@@ -27,7 +27,7 @@ object DataRepository {
                     description = "sneakers",
                     price = 732.0,
                     imageUrl = "mainsneakers",
-                    category = "Popular",
+                    category = "Tennis",
                     isPopular = true
                 ),
                 Sneacker(
@@ -36,7 +36,7 @@ object DataRepository {
                     description = "Running",
                     price = 850.0,
                     imageUrl = "mainsneakers",
-                    category = "Popular",
+                    category = "Running",
                     isPopular = false
                 ),
                 Sneacker(
@@ -51,7 +51,7 @@ object DataRepository {
                 Sneacker(
                     id = 4,
                     name = "Nike Revolution",
-                    description = "donkey",
+                    description = "zebra",
                     price =239.0,
                     imageUrl = "mainsneakers",
                     category = "Tennis",
@@ -60,7 +60,7 @@ object DataRepository {
                 Sneacker(
                     id = 5,
                     name = "Nike Force",
-                    description = "donkey",
+                    description = "monkey",
                     price = 855.0,
                     imageUrl = "mainsneakers",
                     category = "Outdoor",
@@ -69,7 +69,7 @@ object DataRepository {
                 Sneacker(
                     id = 6,
                     name = "Nike Borough",
-                    description = "donkey",
+                    description = "pig",
                     price = 777.0,
                     imageUrl = "mainsneakers",
                     category = "Tennis",
