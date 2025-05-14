@@ -15,9 +15,7 @@ import io.ktor.server.routing.*
 fun Route.authRoute() {
     post("/login") {
         try {
-            val request = call.receive<LoginRequest>()  // Десериализация тела запроса в объект LoginRequest
-
-            // Логирование для отладки
+            val request = call.receive<LoginRequest>()
             println("Received login request: email = ${request.email}, password = ${request.password}")
 
             val user = DataRepository.findUserByEmailAndPassword(request.email, request.password)
@@ -48,39 +46,6 @@ fun Route.authRoute() {
             )
         }
     }
-
-
-//    post("/login") {
-//        try {
-//            val request = call.receive<LoginRequest>()
-//
-//
-//            val user = DataRepository.findUserByEmailAndPassword(request.email, request.password)
-//                ?: run {
-//                    call.respond(
-//                        HttpStatusCode.Unauthorized,
-//                        ErrorResponse("Invalid email or password", HttpStatusCode.Unauthorized.value)
-//                    )
-//                    return@post
-//                }
-//            val token = JwtConfig.generateToken(call.application, user)
-//            call.respond(
-//                HttpStatusCode.OK,
-//                AuthResponse(
-//                    token = token,
-//                    userId = user.userId,
-//                    userName = user.userName,
-//                    email = user.email
-//                )
-//            )
-//
-//        } catch (e: Exception) {
-//            call.respond(
-//                HttpStatusCode.BadRequest,
-//                ErrorResponse("Invalid request format", HttpStatusCode.BadRequest.value)
-//            )
-//        }
-//    }
 
     post("/registration") {
         try {
