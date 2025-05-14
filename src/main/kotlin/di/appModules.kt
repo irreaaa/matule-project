@@ -1,4 +1,6 @@
 package com.example.di
 
-class appModules {
-}
+import com.example.repository.AuthRepository
+import com.example.repository.AuthRepositoryImpl
+import io.ktor.server.application.Application
+

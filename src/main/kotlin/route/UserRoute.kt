@@ -1,64 +1,105 @@
-package com.example.rout
-
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
+import com.example.config.JwtConfig
+import com.example.dto.request.AuthResponse
+import com.example.dto.request.CreateUserRequest
+import com.example.dto.request.LoginRequest
+import com.example.dto.response.ErrorResponse
+import com.example.model.DataRepository
+import com.example.model.DataRepository.userList
+import com.example.model.User
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.Serializable
-import java.util.*
 
-@Serializable
-data class User(
-    val userId: Int,
-    val userName: String,
-    val email: String,
-    val password: String, )
-@Serializable
-data class CreateUserRequest(
-    val userName: String,
-    val email: String,
-    val password: String, )
+fun Route.authRoute() {
+    post("/login") {
+        try {
+            val request = call.receive<LoginRequest>()
 
-val userList = mutableListOf<User>()
 
-fun Route.authRoute(){
-    post("login"){
+            val user = DataRepository.userList.firstOrNull {
+                it.email == request.email && it.password == request.password
+            } ?: run {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    ErrorResponse("Invalid email or password", HttpStatusCode.Unauthorized.value)
+                )
+                return@post
+            }
+            val token = JwtConfig.generateToken(call.application, user)
+            call.respond(
+                HttpStatusCode.OK,
+                AuthResponse(
+                    token = token,
+                    userId = user.userId,
+                    userName = user.userName,
+                    email = user.email
+                )
+            )
 
+        } catch (e: Exception) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse("Invalid request format", HttpStatusCode.BadRequest.value)
+            )
+        }
     }
-    post("registration"){
-        val user = call.receive<CreateUserRequest>()
-        userList.add(User(
-            userId = userList.size + 1,
-            userName = user.userName,
-            email = user.email,
-            password = user.password,
-        ))
-        val jwtAudience = environment.config.property("jwt.audience").getString()
-        val jwtIssue = environment.config.property("jwt.issue").getString()
-        val jwtRealm = environment.config.property("jwt.realm").getString()
-        val jwtSecret = environment.config.property("jwt.secret").getString()
-        val token = JWT.create()
-            .withAudience(jwtAudience)
-            .withIssuer(jwtIssue)
-            .withClaim("user",user.userName)
-            .withExpiresAt(Date(System.currentTimeMillis() + 60000))
-            .sign(Algorithm.HMAC256(jwtSecret))
-        call.respond("Token" to token)
+
+    post("/registration") {
+        try {
+            val request = call.receive<CreateUserRequest>()
+
+            if (userList.any { it.email == request.email }) {
+                call.respond(
+                    HttpStatusCode.Conflict,
+                    ErrorResponse("Email already exists", HttpStatusCode.Conflict.value)
+                )
+                return@post
+            }
+
+            val newUser = User(
+                userId = userList.size + 1,
+                userName = request.userName,
+                email = request.email,
+                password = request.password
+            )
+
+            userList.add(newUser)
+            val token = JwtConfig.generateToken(call.application, newUser)
 
 
+            call.respond(
+                HttpStatusCode.Created,
+                AuthResponse(
+                    token = token,
+                    userId = newUser.userId,
+                    userName = newUser.userName,
+                    email = newUser.email
+                )
+            )
+
+        } catch (e: Exception) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse("Invalid request format", HttpStatusCode.BadRequest.value)
+            )
+        }
     }
+
     authenticate("auth-jwt") {
-        get ("/profile/{userId}")
-        {
-            val userId = call.pathParameters["userId"]?.toInt()
-            val findUser = userList.firstOrNull{ it.userId == userId}
-            if (findUser != null) call.respond(findUser)
-            call.respond(HttpStatusCode.NotFound)
+        get("/profile/{userId}") {
+            val userId = call.parameters["userId"]?.toIntOrNull()
+            val user = userId?.let { id -> userList.firstOrNull { it.userId == id } }
+
+            if (user != null) {
+                call.respond(user)
+            } else {
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    ErrorResponse("User not found", HttpStatusCode.NotFound.value)
+                )
+            }
         }
     }
 }
-
-//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vMC4wLjAuMDo4MDgwIiwiaXNzIjoiaHR0cDovLzAuMC4wLjA6ODA4MCIsInVzZXIiOiJmaXJzdCBwZXJzb24iLCJleHAiOjE3NDEyNDczODd9.aT0FBL2W3Ra7nb5yOdCIZp9FgP5wNv8bS6wLjRb5qx4

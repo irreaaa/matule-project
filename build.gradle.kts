@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
@@ -20,15 +19,21 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.ktor.server.content.negotiation)
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.server.resources)
-    implementation(libs.ktor.server.auth)
-    implementation(libs.ktor.server.auth.jwt)
-    implementation(libs.ktor.server.netty)
-    implementation(libs.logback.classic)
-    implementation(libs.ktor.server.config.yaml)
-    testImplementation(libs.ktor.server.test.host)
-    testImplementation(libs.kotlin.test.junit)
+    implementation("io.insert-koin:koin-ktor:4.0.3")
+    implementation("io.insert-koin:koin-logger-slf4j:3.5.0")
+
+    implementation("io.ktor:ktor-server-core:3.1.3")
+    implementation("io.ktor:ktor-server-netty:3.1.3")
+    implementation("io.ktor:ktor-server-content-negotiation:3.1.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.3")
+    implementation("io.ktor:ktor-server-resources:3.1.3")
+    implementation("io.ktor:ktor-server-auth:3.1.3")
+    implementation("io.ktor:ktor-server-auth-jwt:3.1.3")
+    implementation("io.ktor:ktor-server-config-yaml:3.1.3")
+
+    implementation("ch.qos.logback:logback-classic:1.4.11")
+
+    testImplementation("io.ktor:ktor-server-test-host:3.1.3")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.7.10")
 }
+

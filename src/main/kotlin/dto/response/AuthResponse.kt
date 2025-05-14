@@ -1,11 +1,11 @@
-package com.example.model
+package com.example.dto.request
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AuthDto (
+data class AuthResponse(
+    val token: String,
     val userId: Int,
     val userName: String,
-    val email: String,
-    val password: String,
+    val email: String
 )
