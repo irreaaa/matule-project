@@ -78,4 +78,8 @@ object DataRepository {
             )
         )
     }
+
+    fun findUserByEmailAndPassword(email: String, password: String): User? {
+        return userList.firstOrNull { it.email == email && it.password == password }
+    }
 }

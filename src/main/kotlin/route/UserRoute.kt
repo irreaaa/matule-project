@@ -15,18 +15,20 @@ import io.ktor.server.routing.*
 fun Route.authRoute() {
     post("/login") {
         try {
-            val request = call.receive<LoginRequest>()
+            val request = call.receive<LoginRequest>()  // Десериализация тела запроса в объект LoginRequest
 
+            // Логирование для отладки
+            println("Received login request: email = ${request.email}, password = ${request.password}")
 
-            val user = DataRepository.userList.firstOrNull {
-                it.email == request.email && it.password == request.password
-            } ?: run {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    ErrorResponse("Invalid email or password", HttpStatusCode.Unauthorized.value)
-                )
-                return@post
-            }
+            val user = DataRepository.findUserByEmailAndPassword(request.email, request.password)
+                ?: run {
+                    call.respond(
+                        HttpStatusCode.Unauthorized,
+                        ErrorResponse("Invalid email or password", HttpStatusCode.Unauthorized.value)
+                    )
+                    return@post
+                }
+
             val token = JwtConfig.generateToken(call.application, user)
             call.respond(
                 HttpStatusCode.OK,
@@ -39,12 +41,46 @@ fun Route.authRoute() {
             )
 
         } catch (e: Exception) {
+            println("Error during login: ${e.message}")
             call.respond(
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Invalid request format", HttpStatusCode.BadRequest.value)
             )
         }
     }
+
+
+//    post("/login") {
+//        try {
+//            val request = call.receive<LoginRequest>()
+//
+//
+//            val user = DataRepository.findUserByEmailAndPassword(request.email, request.password)
+//                ?: run {
+//                    call.respond(
+//                        HttpStatusCode.Unauthorized,
+//                        ErrorResponse("Invalid email or password", HttpStatusCode.Unauthorized.value)
+//                    )
+//                    return@post
+//                }
+//            val token = JwtConfig.generateToken(call.application, user)
+//            call.respond(
+//                HttpStatusCode.OK,
+//                AuthResponse(
+//                    token = token,
+//                    userId = user.userId,
+//                    userName = user.userName,
+//                    email = user.email
+//                )
+//            )
+//
+//        } catch (e: Exception) {
+//            call.respond(
+//                HttpStatusCode.BadRequest,
+//                ErrorResponse("Invalid request format", HttpStatusCode.BadRequest.value)
+//            )
+//        }
+//    }
 
     post("/registration") {
         try {

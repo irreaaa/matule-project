@@ -9,13 +9,17 @@ import java.util.*
 object JwtConfig {
     fun generateToken(application: Application, user: User): String {
         val config = application.environment.config
+        val audience = config.property("jwt.audience").getString()
+        val issuer = config.property("jwt.issue").getString()
+        val secret = config.property("jwt.secret").getString()
+
         return JWT.create()
-            .withAudience(config.property("jwt.audience").getString())
-            .withIssuer(config.property("jwt.issuer").getString())
+            .withAudience(audience)
+            .withIssuer(issuer)
             .withClaim("userId", user.userId)
             .withClaim("userName", user.userName)
             .withClaim("email", user.email)
             .withExpiresAt(Date(System.currentTimeMillis() + 60000000))
-            .sign(Algorithm.HMAC256(config.property("jwt.secret").getString()))
+            .sign(Algorithm.HMAC256(secret))
     }
 }
